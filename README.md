@@ -10,7 +10,19 @@
 直接驱动 GPIO 引脚产生各种间隔长短的电平信号。
 
  **无源蜂鸣器：**   
-硬件上必须连接到 STM32 定时器的 PWM 输出通道，利用 rt-thread 的 PWM 驱动，产生相应频率的方波脉冲，驱动无源蜂鸣器。
+硬件上必须连接到 STM32 定时器的 PWM 输出通道，利用 rt-thread 的 PWM 驱动，产生相应频率的方波脉冲，驱动无源蜂鸣器。  
+发声时 PM 组件省电原理，比如发2声脉冲宽度500ms，周期1000ms，频率2500Hz，默认PM_SLEEP_MODE_IDLE。则在发声时请求SLEEP模式，以维持声音不断，在不发声的间隙释放SLEEP模式，MCU 进入 STOP 模式，以节省电流：
+
+```
+时间点                0ms          500ms        1000ms       1500ms       2000ms
+                      _____________             _____________             
+脉冲              ____|            |____________|            |____________
+
+载波                  |   2500Hz   |   无输出    |   2500Hz   |   无输出    |
+
+MCU PM模式            | SLEEP MODE | STOP  MODE | SLEEP MODE | STOP  MODE |
+```
+
 
 ## 获取软件包
 
@@ -19,7 +31,7 @@
 ```
 RT-Thread online packages
     peripheral libraries and drivers  --->
-         [*] beep: Buzzer beep package on rt-thread.  --->
+         [*] beep: Control the buzzer to make beeps at different intervals.  --->
                (X) Active buzzer
                ( ) Passive buzzer
 ```
@@ -30,7 +42,7 @@ RT-Thread online packages
  
 
 ```
---- beep: Buzzer beep package on rt-thread.
+--- beep: Control the buzzer to make beeps at different intervals.
       Buzzer type (Active buzzer)  --->
 [*]   Use heap with the beep thread stack created.
       Version (latest)  --->
@@ -42,7 +54,7 @@ RT-Thread online packages
 #### 无源蜂鸣器设置界面：
 
 ```
---- beep: Buzzer beep package on rt-thread.
+--- beep: Control the buzzer to make beeps at different intervals.
       Buzzer type (Passive buzzer)  --->
 (pwm1) Setting current PWM device name.
 (4)   Setting current PWM device channel.
