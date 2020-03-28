@@ -61,6 +61,9 @@ static struct rt_device_pm_ops beep_pm_ops =
 void beep_init(rt_base_t pin, rt_base_t reset_level)
 {
 #ifdef PKG_BEEP_PASSIVE_BUZZER
+    (void)pin;
+    (void)reset_level;
+
     beep_data.pwm_dev = (struct rt_device_pwm *)rt_device_find(PKG_BEEP_PWM_DEV_NAME);
     RT_ASSERT(beep_data.pwm_dev);
 
@@ -230,6 +233,7 @@ void beep_thread_entry(void *parameter)
     beep_thread = RT_NULL;
 }
 
+#ifdef PKG_BEEP_USING_MSH_CMD
 static void __beep(rt_uint8_t argc, char **argv)
 {
     int nums, period, prcent, freq;
@@ -277,5 +281,6 @@ static void __beep(rt_uint8_t argc, char **argv)
     }
 }
 MSH_CMD_EXPORT_ALIAS(__beep, beep, Buzzer beep any);
+#endif /* PKG_BEEP_USING_MSH_CMD */
 
 #endif /* PKG_USING_BEEP */
