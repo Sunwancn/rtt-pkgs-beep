@@ -11,7 +11,6 @@
 #include <rtdevice.h>
 #include <rtthread.h>
 #include <beep.h>
-#include <stdlib.h>
 
 #ifdef PKG_USING_BEEP
 
@@ -233,7 +232,9 @@ void beep_thread_entry(void *parameter)
     beep_thread = RT_NULL;
 }
 
-#ifdef PKG_BEEP_USING_MSH_CMD
+#if defined(RT_USING_FINSH) && defined(PKG_BEEP_USING_MSH_CMD)
+#include <stdlib.h>
+
 static void __beep(rt_uint8_t argc, char **argv)
 {
     int nums, period, prcent, freq;
@@ -281,6 +282,6 @@ static void __beep(rt_uint8_t argc, char **argv)
     }
 }
 MSH_CMD_EXPORT_ALIAS(__beep, beep, Buzzer beep any);
-#endif /* PKG_BEEP_USING_MSH_CMD */
+#endif /* defined(RT_USING_FINSH) && defined(PKG_BEEP_USING_MSH_CMD) */
 
 #endif /* PKG_USING_BEEP */
