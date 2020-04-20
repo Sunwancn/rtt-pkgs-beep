@@ -18,8 +18,8 @@ extern "C" {
 #endif
 
 /* 线程栈相关配置 */
-#define PKG_BEEP_THREAD_PRIORITY        (RT_THREAD_PRIORITY_MAX - 1) * 7 / 8
-#define PKG_BEEP_THREAD_STACK_SIZE      192
+#define PKG_BEEP_THREAD_PRIORITY        ((RT_THREAD_PRIORITY_MAX - 1) * 7 / 8)
+#define PKG_BEEP_THREAD_STACK_SIZE      256
 #define PKG_BEEP_THREAD_TIMESLICE       (10U * RT_TICK_PER_SECOND / 1000U)  // 10ms
 #define PKG_BEEP_WAIT_SEM_MAX_TICK      (10U * RT_TICK_PER_SECOND)
 
