@@ -74,8 +74,8 @@ void beep_init(rt_base_t pin, rt_base_t reset_level)
 
     beep_set();
 #else /* PKG_BEEP_ACTIVE_BUZZER */
-    rt_pin_write(pin, reset_level);
     rt_pin_mode(pin, PIN_MODE_OUTPUT);
+    rt_pin_write(pin, reset_level);
 
     beep_data.pin = pin;
     beep_data.pin_reset_level = reset_level;
