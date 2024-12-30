@@ -150,8 +150,7 @@ void beep(rt_uint32_t nums, rt_uint32_t period, rt_uint32_t percent, rt_uint32_t
             beep_set();
         }
 #endif /* PKG_BEEP_PASSIVE_BUZZER */
-
-        if (beep_thread == RT_NULL || beep_thread->stat == RT_THREAD_CLOSE)
+        if (beep_thread == RT_NULL || beep_thread->sched_thread_ctx.stat == RT_THREAD_CLOSE)
         {
 #ifdef PKG_BEEP_THREAD_STACK_USING_HEAP
             beep_thread = rt_thread_create("beep", beep_thread_entry, RT_NULL,
