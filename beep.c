@@ -15,7 +15,11 @@
 #ifdef PKG_USING_BEEP
 
 #if !defined(PKG_BEEP_THREAD_STACK_USING_HEAP)
+#ifdef ALIGN
 ALIGN(RT_ALIGN_SIZE)
+#else
+rt_align(RT_ALIGN_SIZE)
+#endif
 static char beep_thread_stack[PKG_BEEP_THREAD_STACK_SIZE];
 static struct rt_thread beep_thread_struct = {0};
 #endif /* !defined(PKG_BEEP_THREAD_STACK_USING_HEAP) */
@@ -81,7 +85,9 @@ void beep_init(rt_base_t pin, rt_base_t reset_level)
     beep_data.pin_reset_level = reset_level;
 #endif /* PKG_BEEP_PASSIVE_BUZZER */
 
+#if defined(RT_USING_FINSH) && defined(PKG_BEEP_USING_MSH_CMD)
     beep_data.inited = RT_TRUE;
+#endif
 }
 
 /***************************************************************************************************
@@ -100,7 +106,9 @@ void beep_deinit(void)
     beep_data.pwm_dev = RT_NULL;
 #endif /* PKG_BEEP_PASSIVE_BUZZER */
 
+#if defined(RT_USING_FINSH) && defined(PKG_BEEP_USING_MSH_CMD)
     beep_data.inited = RT_FALSE;
+#endif
 }
 
 #ifdef PKG_BEEP_PASSIVE_BUZZER
@@ -139,9 +147,11 @@ void beep(rt_uint32_t nums, rt_uint32_t period, rt_uint32_t percent, rt_uint32_t
 
     if (nums)
     {
-        beep_data.nums = nums;
-        beep_data.pulse = period * percent / 100;
-        beep_data.npulse = period - beep_data.pulse;
+        if (beep_thread != RT_NULL &&
+                (((rt_object_t)beep_thread)->type & 0x7F) == RT_Object_Class_Thread)
+        {
+            beep_stop();
+        }
 
 #ifdef PKG_BEEP_PASSIVE_BUZZER
         if (freq && beep_data.freq != freq)
@@ -151,19 +161,29 @@ void beep(rt_uint32_t nums, rt_uint32_t period, rt_uint32_t percent, rt_uint32_t
         }
 #endif /* PKG_BEEP_PASSIVE_BUZZER */
 
-        if (beep_thread == RT_NULL || beep_thread->stat == RT_THREAD_CLOSE)
+        if (beep_thread == RT_NULL)
         {
+            beep_data.nums = nums;
+            beep_data.pulse = period * percent / 100;
+            beep_data.npulse = period - beep_data.pulse;
+
 #ifdef PKG_BEEP_THREAD_STACK_USING_HEAP
             beep_thread = rt_thread_create("beep", beep_thread_entry, RT_NULL,
                                            PKG_BEEP_THREAD_STACK_SIZE, PKG_BEEP_THREAD_PRIORITY, PKG_BEEP_THREAD_TIMESLICE);
             if (beep_thread != RT_NULL)
                 rt_thread_startup(beep_thread);
-#else
+            else
+                rt_kprintf("[beep] error: no enough memory to allocate for the stack.\n");
+#else /* PKG_BEEP_THREAD_STACK_USING_HEAP */
             beep_thread = &beep_thread_struct;
             rt_thread_init(beep_thread, "beep", beep_thread_entry, RT_NULL,
-                           &beep_thread_stack, sizeof(beep_thread_stack), PKG_BEEP_THREAD_PRIORITY, PKG_BEEP_THREAD_TIMESLICE);
+                           beep_thread_stack, sizeof(beep_thread_stack), PKG_BEEP_THREAD_PRIORITY, PKG_BEEP_THREAD_TIMESLICE);
             rt_thread_startup(beep_thread);
-#endif /* PKG_BEEP_THREAD_STACK_USING_HEAP */
+#endif
+        }
+        else
+        {
+            RT_ASSERT(0);
         }
     }
 }

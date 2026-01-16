@@ -19,7 +19,7 @@ extern "C" {
 
 /* 线程栈相关配置 */
 #define PKG_BEEP_THREAD_PRIORITY        ((RT_THREAD_PRIORITY_MAX - 1) * 7 / 8)
-#define PKG_BEEP_THREAD_STACK_SIZE      256
+#define PKG_BEEP_THREAD_STACK_SIZE      384
 #define PKG_BEEP_THREAD_TIMESLICE       (10U * RT_TICK_PER_SECOND / 1000U)  // 10ms
 #define PKG_BEEP_WAIT_SEM_MAX_TICK      (10U * RT_TICK_PER_SECOND)
 
@@ -71,7 +71,9 @@ struct beep_struct
     rt_uint32_t nums;
     rt_uint32_t pulse;
     rt_uint32_t npulse;
+#if defined(RT_USING_FINSH) && defined(PKG_BEEP_USING_MSH_CMD)
     rt_bool_t inited;
+#endif
 };
 
 extern void beep_init(rt_base_t pin, rt_base_t reset_level);
